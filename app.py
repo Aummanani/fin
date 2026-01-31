@@ -5,7 +5,7 @@ import google.generativeai as genai
 # Replace with your API key from https://aistudio.google.com/
 GOOGLE_API_KEY = "AIzaSyCff2Wr8sDn8RnBqD0NQIewz9VqQGKACI0" 
 genai.configure(api_key=GOOGLE_API_KEY)
-model = genai.GenerativeModel('gemini-1.5-flash')
+model = genai.GenerativeModel('gemini-3-flash-preview')
 
 # --- PAGE SETUP ---
 st.set_page_config(page_title="FinBot: Your Finance Expert", page_icon="💰")
