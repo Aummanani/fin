@@ -3,7 +3,7 @@ import google.generativeai as genai
 
 # --- CONFIGURATION ---
 # Replace with your API key from https://aistudio.google.com/
-GOOGLE_API_KEY = "AIzaSyCff2Wr8sDn8RnBqD0NQIewz9VqQGKACI0" 
+GOOGLE_API_KEY = "AIzaSyCULfEUzinRlW0v3N7HqqU_Trp80ZgGTk4" 
 genai.configure(api_key=GOOGLE_API_KEY)
 model = genai.GenerativeModel('gemini-3-flash-preview')
 
