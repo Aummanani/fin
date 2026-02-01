@@ -160,27 +160,28 @@ if prompt := st.chat_input("Ask about stocks, savings, or taxes..."):
         conversation += f"{m['role']}: {m['content']}\n"
 
     # Assistant response
-    with st.chat_message("assistant"):
-        try:
-            with st.spinner("Analyzing your question..."):
-                time.sleep(0.5)
-                full_prompt = f"""
-                {FINANCE_CONTEXT}
+  with st.chat_message("assistant"):
+    try:
+        with st.spinner("Analyzing your question..."):
+            time.sleep(0.5)
 
-                User profile:
-                Risk preference: {risk_level}
-                Knowledge level: {expertise}
+            full_prompt = f"""
+{FINANCE_CONTEXT}
 
-                Conversation so far:
-                {conversation}
+User profile:
+Risk preference: {risk_level}
+Knowledge level: {expertise}
 
-                User question:
-                {prompt}
-                """
+Conversation so far:
+{conversation}
 
-              main_response = model.generate_content(outro_prompt).text
+User question:
+{prompt}
+"""
 
-outro_prompt = f"""
+            main_response = model.generate_content(full_prompt).text
+
+            outro_prompt = f"""
 {OUTRO_CONTEXT}
 
 User question:
@@ -190,9 +191,9 @@ Assistant answer:
 {main_response}
 """
 
-outro_response = model.generate_content(outro_prompt).text
+            outro_response = model.generate_content(outro_prompt).text
 
-reply = f"""
+            reply = f"""
 {main_response}
 
 ---
@@ -200,10 +201,10 @@ reply = f"""
 {outro_response}
 """
 
-            st.markdown(reply)
-            st.session_state.messages.append(
-                {"role": "assistant", "content": reply}
-            )
+        st.markdown(reply)
+        st.session_state.messages.append(
+            {"role": "assistant", "content": reply}
+        )
 
-        except Exception:
-            st.error("⚠️ Something went wrong. Please try again.")
+    except Exception as e:
+        st.error("⚠️ Something went wrong. Please try again.")
