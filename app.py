@@ -37,6 +37,15 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+st.markdown("""
+<style>
+    h3 {
+        margin-top: 1.5rem;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+
 # =========================
 # API CONFIG
 # =========================
@@ -169,8 +178,27 @@ if prompt := st.chat_input("Ask about stocks, savings, or taxes..."):
                 {prompt}
                 """
 
-                response = model.generate_content(full_prompt)
-                reply = response.text
+              main_response = model.generate_content(full_prompt).text
+
+outro_prompt = f"""
+{OUTRO_CONTEXT}
+
+User question:
+{prompt}
+
+Assistant answer:
+{main_response}
+"""
+
+outro_response = model.generate_content(outro_prompt).text
+
+reply = f"""
+{main_response}
+
+---
+### 🔎 You might also explore:
+{outro_response}
+"""
 
             st.markdown(reply)
             st.session_state.messages.append(
