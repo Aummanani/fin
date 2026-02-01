@@ -1,43 +1,170 @@
 import streamlit as st
 import google.generativeai as genai
+import time
 
-# --- CONFIGURATION ---
-# Replace with your API key from https://aistudio.google.com/
-GOOGLE_API_KEY = st.secrets["GEMINI_API_KEY"]
-genai.configure(api_key=GOOGLE_API_KEY)
-model = genai.GenerativeModel('gemini-3-flash-preview')
-
-# --- PAGE SETUP ---
-st.set_page_config(page_title="FinBot: Your Finance Expert", page_icon="💰")
-st.title("💰 FinBot AI")
-st.caption("Professional Financial Guidance & Market Insights")
-
-# --- SYSTEM PROMPT ---
-FINANCE_CONTEXT = (
-    "You are a helpful and professional financial advisor chatbot. "
-    "Provide clear, concise information on budgeting, investing, and markets. "
-    "Always include a disclaimer that this is not professional financial advice."
+# =========================
+# PAGE CONFIG
+# =========================
+st.set_page_config(
+    page_title="FinBot – AI Finance Assistant",
+    page_icon="💰",
+    layout="wide"
 )
 
-# --- SESSION STATE ---
+# =========================
+# CUSTOM CSS
+# =========================
+st.markdown("""
+<style>
+    .main {
+        padding: 2rem;
+    }
+    h1 {
+        font-weight: 700;
+    }
+    .stChatMessage {
+        padding: 1rem;
+        border-radius: 12px;
+    }
+    .stChatMessage[data-testid="stChatMessage-user"] {
+        background-color: #f0f2f6;
+    }
+    .stChatMessage[data-testid="stChatMessage-assistant"] {
+        background-color: #e8f5e9;
+    }
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+</style>
+""", unsafe_allow_html=True)
+
+# =========================
+# API CONFIG
+# =========================
+GOOGLE_API_KEY = st.secrets["GEMINI_API_KEY"]
+genai.configure(api_key=GOOGLE_API_KEY)
+model = genai.GenerativeModel("gemini-3-flash-preview")
+
+# =========================
+# SYSTEM PROMPT
+# =========================
+FINANCE_CONTEXT = """
+You are FinBot, a professional and friendly financial education assistant.
+You explain finance topics in simple, structured language.
+
+You can help with:
+- Budgeting & savings
+- Stock market basics
+- Mutual funds & SIPs
+- Taxes (high-level overview)
+
+Rules:
+- Be concise and clear
+- Use bullet points where useful
+- ALWAYS include a disclaimer:
+  "This is for educational purposes only, not professional financial advice."
+"""
+
+# =========================
+# SIDEBAR
+# =========================
+with st.sidebar:
+    st.header("⚙️ FinBot Settings")
+    st.markdown("Customize your guidance experience.")
+
+    risk_level = st.selectbox(
+        "Risk Preference",
+        ["Conservative", "Balanced", "Aggressive"]
+    )
+
+    expertise = st.radio(
+        "Knowledge Level",
+        ["Beginner", "Intermediate", "Advanced"]
+    )
+
+    st.divider()
+    st.caption("⚠️ Educational use only")
+
+# =========================
+# HEADER
+# =========================
+st.markdown("""
+<h1>💰 FinBot</h1>
+<p style="color: gray; margin-top: -10px;">
+Smart finance insights, explained simply.
+</p>
+""", unsafe_allow_html=True)
+
+with st.expander("🤖 How FinBot Works"):
+    st.markdown("""
+    FinBot provides educational insights on personal finance and markets.
+
+    • No real-time financial data  
+    • No personalized investment advice  
+
+    ⚠️ **This is not professional financial advice.**
+    """)
+
+# =========================
+# SESSION STATE
+# =========================
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Display chat history
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+# =========================
+# EMPTY STATE
+# =========================
+if not st.session_state.messages:
+    st.info("💡 Ask about savings, SIPs, stocks, budgeting, or tax basics.")
 
-# --- CHAT LOGIC ---
-if prompt := st.chat_input("Ask me about stocks, savings, or taxes..."):
+# =========================
+# CHAT HISTORY
+# =========================
+for msg in st.session_state.messages:
+    with st.chat_message(msg["role"]):
+        st.markdown(msg["content"])
+
+# =========================
+# CHAT INPUT
+# =========================
+if prompt := st.chat_input("Ask about stocks, savings, or taxes..."):
     # User message
-    st.session_state.messages.append({"role": "user", "content": prompt})
+    st.session_state.messages.append(
+        {"role": "user", "content": prompt}
+    )
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # Bot response
+    # Build conversation context (last 5 messages)
+    conversation = ""
+    for m in st.session_state.messages[-5:]:
+        conversation += f"{m['role']}: {m['content']}\n"
+
+    # Assistant response
     with st.chat_message("assistant"):
-        full_prompt = f"{FINANCE_CONTEXT}\n\nUser: {prompt}"
-        response = model.generate_content(full_prompt)
-        st.markdown(response.text)
-        st.session_state.messages.append({"role": "assistant", "content": response.text})
+        try:
+            with st.spinner("Analyzing your question..."):
+                time.sleep(0.5)
+                full_prompt = f"""
+                {FINANCE_CONTEXT}
+
+                User profile:
+                Risk preference: {risk_level}
+                Knowledge level: {expertise}
+
+                Conversation so far:
+                {conversation}
+
+                User question:
+                {prompt}
+                """
+
+                response = model.generate_content(full_prompt)
+                reply = response.text
+
+            st.markdown(reply)
+            st.session_state.messages.append(
+                {"role": "assistant", "content": reply}
+            )
+
+        except Exception:
+            st.error("⚠️ Something went wrong. Please try again.")
