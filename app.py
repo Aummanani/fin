@@ -63,6 +63,17 @@ Rules:
 - ALWAYS include a disclaimer:
   "This is for educational purposes only, not professional financial advice."
 """
+OUTRO_CONTEXT = """
+Based on the user's question, suggest 3 short, relevant follow-up questions
+the user might want to ask next.
+
+Rules:
+- Suggestions must be directly related to the user's question
+- Keep them short (max 8–10 words each)
+- Do NOT repeat the original question
+- Do NOT give advice, only topics/questions
+- Format strictly as bullet points
+"""
 
 # =========================
 # SIDEBAR
