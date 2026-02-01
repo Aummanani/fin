@@ -16,24 +16,24 @@ st.set_page_config(
 # =========================
 st.markdown("""
 <style>
-    .main {
-        padding: 2rem;
-    }
-    h1 {
-        font-weight: 700;
-    }
-    .stChatMessage {
-        padding: 1rem;
-        border-radius: 12px;
-    }
-    .stChatMessage[data-testid="stChatMessage-user"] {
-        background-color: #f0f2f6;
-    }
-    .stChatMessage[data-testid="stChatMessage-assistant"] {
-        background-color: #e8f5e9;
-    }
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
+.main {
+    padding: 2rem;
+}
+h1 {
+    font-weight: 700;
+}
+.stChatMessage {
+    padding: 1rem;
+    border-radius: 12px;
+}
+.stChatMessage[data-testid="stChatMessage-user"] {
+    background-color: #f0f2f6;
+}
+.stChatMessage[data-testid="stChatMessage-assistant"] {
+    background-color: #e8f5e9;
+}
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
 </style>
 """, unsafe_allow_html=True)
 
@@ -45,34 +45,27 @@ genai.configure(api_key=GOOGLE_API_KEY)
 model = genai.GenerativeModel("gemini-3-flash-preview")
 
 # =========================
-# SYSTEM PROMPT
+# PROMPTS
 # =========================
 FINANCE_CONTEXT = """
 You are FinBot, a professional and friendly financial education assistant.
 You explain finance topics in simple, structured language.
 
-You can help with:
-- Budgeting & savings
-- Stock market basics
-- Mutual funds & SIPs
-- Taxes (high-level overview)
-
 Rules:
-- Be concise and clear
-- Use bullet points where useful
-- ALWAYS include a disclaimer:
-  "This is for educational purposes only, not professional financial advice."
+- Be concise
+- Use bullet points
+- ALWAYS include:
+"This is for educational purposes only, not professional financial advice."
 """
+
 OUTRO_CONTEXT = """
-Based on the user's question, suggest 3 short, relevant follow-up questions
-the user might want to ask next.
+Suggest 3 short follow-up questions related to the user's query.
 
 Rules:
-- Suggestions must be directly related to the user's question
-- Keep them short (max 8–10 words each)
-- Do NOT repeat the original question
-- Do NOT give advice, only topics/questions
-- Format strictly as bullet points
+- Max 8 words each
+- Bullet points only
+- No advice
+- No repetition
 """
 
 # =========================
@@ -80,7 +73,6 @@ Rules:
 # =========================
 with st.sidebar:
     st.header("⚙️ FinBot Settings")
-    st.markdown("Customize your guidance experience.")
 
     risk_level = st.selectbox(
         "Risk Preference",
@@ -100,20 +92,10 @@ with st.sidebar:
 # =========================
 st.markdown("""
 <h1>💰 FinBot</h1>
-<p style="color: gray; margin-top: -10px;">
+<p style="color:gray;margin-top:-10px;">
 Smart finance insights, explained simply.
 </p>
 """, unsafe_allow_html=True)
-
-with st.expander("🤖 How FinBot Works"):
-    st.markdown("""
-    FinBot provides educational insights on personal finance and markets.
-
-    • No real-time financial data  
-    • No personalized investment advice  
-
-    ⚠️ **This is not professional financial advice.**
-    """)
 
 # =========================
 # SESSION STATE
@@ -121,11 +103,8 @@ with st.expander("🤖 How FinBot Works"):
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# =========================
-# EMPTY STATE
-# =========================
 if not st.session_state.messages:
-    st.info("💡 Ask about savings, SIPs, stocks, budgeting, or tax basics.")
+    st.info("💡 Ask about savings, SIPs, stocks, or taxes.")
 
 # =========================
 # CHAT HISTORY
@@ -138,52 +117,54 @@ for msg in st.session_state.messages:
 # CHAT INPUT
 # =========================
 if prompt := st.chat_input("Ask about stocks, savings, or taxes..."):
-    # User message
     st.session_state.messages.append(
         {"role": "user", "content": prompt}
     )
+
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # Build conversation context (last 5 messages)
     conversation = ""
     for m in st.session_state.messages[-5:]:
         conversation += f"{m['role']}: {m['content']}\n"
 
-    # Assistant response
+    # =========================
+    # ASSISTANT RESPONSE
+    # =========================
     with st.chat_message("assistant"):
         try:
             with st.spinner("Analyzing your question..."):
-                time.sleep(0.5)
+                time.sleep(0.4)
+
                 full_prompt = f"""
-                {FINANCE_CONTEXT}
+{FINANCE_CONTEXT}
 
-                User profile:
-                Risk preference: {risk_level}
-                Knowledge level: {expertise}
+User profile:
+Risk: {risk_level}
+Level: {expertise}
 
-                Conversation so far:
-                {conversation}
+Conversation:
+{conversation}
 
-                User question:
-                {prompt}
-                """
+User question:
+{prompt}
+"""
 
                 main_response = model.generate_content(full_prompt).text
 
-outro_prompt = f"""
+                outro_prompt = f"""
 {OUTRO_CONTEXT}
 
 User question:
 {prompt}
 
-Assistant answer:
+Answer:
 {main_response}
 """
 
-outro_response = model.generate_content(outro_prompt).text
+                outro_response = model.generate_content(outro_prompt).text
 
-reply = f"""
+                reply = f"""
 {main_response}
 
 ---
@@ -196,5 +177,5 @@ reply = f"""
                 {"role": "assistant", "content": reply}
             )
 
-        except Exception:
+        except Exception as e:
             st.error("⚠️ Something went wrong. Please try again.")
