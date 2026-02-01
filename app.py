@@ -64,6 +64,18 @@ Rules:
   "This is for educational purposes only, not professional financial advice."
 """
 
+OUTRO_CONTEXT = """
+Based on the user's question, suggest 3 short, relevant follow-up questions
+the user might want to ask next.
+
+Rules:
+- Suggestions must be directly related to the user's question
+- Keep them short (max 8–10 words each)
+- Do NOT repeat the original question
+- Do NOT give advice, only topics/questions
+- Format strictly as bullet points
+"""
+
 # =========================
 # SIDEBAR
 # =========================
@@ -158,8 +170,28 @@ if prompt := st.chat_input("Ask about stocks, savings, or taxes..."):
                 {prompt}
                 """
 
-                response = model.generate_content(full_prompt)
-                reply = response.text
+                main_response = model.generate_content(full_prompt).text
+
+outro_prompt = f"""
+{OUTRO_CONTEXT}
+
+User question:
+{prompt}
+
+Assistant answer:
+{main_response}
+"""
+
+outro_response = model.generate_content(outro_prompt).text
+
+reply = f"""
+{main_response}
+
+---
+### 🔎 You might also explore:
+{outro_response}
+"""
+
 
             st.markdown(reply)
             st.session_state.messages.append(
