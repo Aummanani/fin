@@ -178,7 +178,7 @@ if prompt := st.chat_input("Ask about stocks, savings, or taxes..."):
                 {prompt}
                 """
 
-              main_response = model.generate_content(full_prompt).text
+              main_response = model.generate_content(outro_prompt).text
 
 outro_prompt = f"""
 {OUTRO_CONTEXT}
