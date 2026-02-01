@@ -37,15 +37,6 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown("""
-<style>
-    h3 {
-        margin-top: 1.5rem;
-    }
-</style>
-""", unsafe_allow_html=True)
-
-
 # =========================
 # API CONFIG
 # =========================
@@ -71,17 +62,6 @@ Rules:
 - Use bullet points where useful
 - ALWAYS include a disclaimer:
   "This is for educational purposes only, not professional financial advice."
-"""
-OUTRO_CONTEXT = """
-Based on the user's question, suggest 3 short, relevant follow-up questions
-the user might want to ask next.
-
-Rules:
-- Suggestions must be directly related to the user's question
-- Keep them short (max 8–10 words each)
-- Do NOT repeat the original question
-- Do NOT give advice, only topics/questions
-- Format strictly as bullet points
 """
 
 # =========================
@@ -160,51 +140,31 @@ if prompt := st.chat_input("Ask about stocks, savings, or taxes..."):
         conversation += f"{m['role']}: {m['content']}\n"
 
     # Assistant response
-  with st.chat_message("assistant"):
-    try:
-        with st.spinner("Analyzing your question..."):
-            time.sleep(0.5)
+    with st.chat_message("assistant"):
+        try:
+            with st.spinner("Analyzing your question..."):
+                time.sleep(0.5)
+                full_prompt = f"""
+                {FINANCE_CONTEXT}
 
-            full_prompt = f"""
-{FINANCE_CONTEXT}
+                User profile:
+                Risk preference: {risk_level}
+                Knowledge level: {expertise}
 
-User profile:
-Risk preference: {risk_level}
-Knowledge level: {expertise}
+                Conversation so far:
+                {conversation}
 
-Conversation so far:
-{conversation}
+                User question:
+                {prompt}
+                """
 
-User question:
-{prompt}
-"""
+                response = model.generate_content(full_prompt)
+                reply = response.text
 
-            main_response = model.generate_content(full_prompt).text
+            st.markdown(reply)
+            st.session_state.messages.append(
+                {"role": "assistant", "content": reply}
+            )
 
-            outro_prompt = f"""
-{OUTRO_CONTEXT}
-
-User question:
-{prompt}
-
-Assistant answer:
-{main_response}
-"""
-
-            outro_response = model.generate_content(outro_prompt).text
-
-            reply = f"""
-{main_response}
-
----
-### 🔎 You might also explore:
-{outro_response}
-"""
-
-        st.markdown(reply)
-        st.session_state.messages.append(
-            {"role": "assistant", "content": reply}
-        )
-
-    except Exception as e:
-        st.error("⚠️ Something went wrong. Please try again.")
+        except Exception:
+            st.error("⚠️ Something went wrong. Please try again.")
