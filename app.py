@@ -3,135 +3,157 @@ import google.generativeai as genai
 import time
 
 # =========================
-# 1. ELITE PAGE CONFIG
+# PAGE CONFIG
 # =========================
 st.set_page_config(
-    page_title="ArthaX – Smart Wealth AI",
+    page_title="ArthaX – AI Finance Assistant",
     page_icon="💹",
-    layout="wide",
-    initial_sidebar_state="expanded"
+    layout="wide"
 )
 
 # =========================
-# 2. PRO-LEVEL CUSTOM CSS
+# API CONFIG (Optimized)
+# =========================
+try:
+    # Use 1.5-flash for speed and stability
+    genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+    model = genai.GenerativeModel("gemini-1.5-flash")
+except Exception as e:
+    st.error("API Key missing or invalid. Please check your secrets.")
+    st.stop()
+
+# =========================
+# ADVANCED CUSTOM CSS
 # =========================
 st.markdown("""
 <style>
-    /* Main Background & Font */
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
-    html, body, [class*="st-"] { font-family: 'Inter', sans-serif; }
-    
+    /* Main Background */
     .stApp {
-        background: linear-gradient(160deg, #0f172a 0%, #1e293b 100%);
-        color: #f8fafc;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
     }
 
-    /* Sidebar Glassmorphism */
+    /* Sidebar Styling */
     section[data-testid="stSidebar"] {
-        background-color: rgba(15, 23, 42, 0.8) !important;
-        backdrop-filter: blur(15px);
-        border-right: 1px solid rgba(255,255,255,0.1);
+        background-color: rgba(255, 255, 255, 0.8) !important;
+        backdrop-filter: blur(10px);
+        border-right: 1px solid rgba(0,0,0,0.05);
     }
 
-    /* Chat Bubble Styling */
+    /* Chat Bubbles Customization */
     .stChatMessage {
-        background: rgba(255, 255, 255, 0.05) !important;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 15px !important;
-        padding: 20px !important;
-        margin-bottom: 20px !important;
+        border-radius: 20px !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        margin-bottom: 15px;
+        border: 1px solid rgba(255,255,255,0.3);
     }
-
-    /* Custom Header */
-    .hero-text {
-        background: linear-gradient(to right, #10b981, #3b82f6);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        font-weight: 800;
-        font-size: 3.5rem;
+    
+    /* Header Animation */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
     }
-
-    /* Floating Metric Cards */
-    .card {
-        background: rgba(255, 255, 255, 0.03);
-        border-radius: 12px;
-        padding: 20px;
-        border: 1px solid rgba(255,255,255,0.1);
+    .header-container {
+        animation: fadeIn 0.8s ease-out;
         text-align: center;
+        padding: 20px;
+    }
+
+    /* Custom Metric Cards */
+    .metric-card {
+        background: white;
+        padding: 15px;
+        border-radius: 15px;
+        text-align: center;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.02);
     }
 </style>
 """, unsafe_allow_html=True)
 
 # =========================
-# 3. CORE LOGIC & API
-# =========================
-try:
-    genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-    # Fixed model ID for stability
-    model = genai.GenerativeModel("gemini-1.5-flash-latest")
-except Exception as e:
-    st.error("Connect your Gemini API Key in secrets to begin.")
-    st.stop()
-
-# =========================
-# 4. INTERACTIVE SIDEBAR
+# SIDEBAR & DASHBOARD
 # =========================
 with st.sidebar:
-    st.markdown("<h2 style='color:#10b981;'>⚙️ ArthaX Command</h2>", unsafe_allow_html=True)
+    # Optional: If you saved your logo as logo.png
+    # st.image("logo.png", width=150)
+    st.markdown("## ⚙️ Personalization")
     
-    # Financial DNA Profile
-    st.write("---")
-    risk = st.select_slider("Risk Tolerance", ["Safe", "Moderate", "Aggressive"], value="Moderate")
-    goal = st.selectbox("Primary Goal", ["Wealth Creation", "Tax Saving", "Retirement", "Debt Exit"])
-    
-    st.write("---")
-    if st.button("🔄 Reset Terminal", use_container_width=True):
+    risk_level = st.select_slider(
+        "Risk Appetite",
+        options=["Conservative", "Balanced", "Aggressive"],
+        value="Balanced"
+    )
+
+    expertise = st.radio(
+        "Financial Literacy",
+        ["Beginner", "Intermediate", "Advanced"],
+        horizontal=True
+    )
+
+    st.divider()
+    if st.button("🗑️ Clear Conversation", use_container_width=True):
         st.session_state.messages = []
         st.rerun()
+    
+    st.markdown("---")
+    st.caption("🔒 Secured by Gemini 1.5 Flash")
 
 # =========================
-# 5. DASHBOARD HEADER
+# INTERACTIVE HEADER
 # =========================
-st.markdown("<div style='text-align:center;'><h1 class='hero-text'>ArthaX</h1><p style='color:#94a3b8; font-size:1.1rem;'>The Future of Financial Intelligence</p></div>", unsafe_allow_html=True)
+st.markdown("""
+<div class="header-container">
+    <h1 style='font-size: 3rem; color: #1E3A8A;'>Artha<span style='color: #10B981;'>X</span></h1>
+    <p style='font-size: 1.2rem; color: #4B5563;'>Your Intelligent Path to Wealth</p>
+</div>
+""", unsafe_allow_html=True)
 
-# Real-time indicators based on user choice
-c1, c2, c3 = st.columns(3)
-with c1: st.markdown(f"<div class='card'><small>STRATEGY</small><br><b>{risk}</b></div>", unsafe_allow_html=True)
-with c2: st.markdown(f"<div class='card'><small>GOAL</small><br><b>{goal}</b></div>", unsafe_allow_html=True)
-with c3: st.markdown(f"<div class='card'><small>STATUS</small><br><b style='color:#10b981;'>System Online</b></div>", unsafe_allow_html=True)
+# Mini Dashboard for context
+col1, col2, col3 = st.columns(3)
+with col1:
+    st.markdown(f"<div class='metric-card'><b>Mode</b><br>🎓 Education</div>", unsafe_allow_html=True)
+with col2:
+    st.markdown(f"<div class='metric-card'><b>Risk</b><br>🎯 {risk_level}</div>", unsafe_allow_html=True)
+with col3:
+    st.markdown(f"<div class='metric-card'><b>Level</b><br>🧠 {expertise}</div>", unsafe_allow_html=True)
 
-st.write("<br>", unsafe_allow_html=True)
+st.markdown("<br>", unsafe_allow_html=True)
 
 # =========================
-# 6. INTELLIGENT CHAT
+# CHAT ENGINE
 # =========================
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Show history
-for m in st.session_state.messages:
-    with st.chat_message(m["role"]):
-        st.markdown(m["content"])
+# Display chat history with nice avatars
+for msg in st.session_state.messages:
+    avatar = "👤" if msg["role"] == "user" else "🤖"
+    with st.chat_message(msg["role"], avatar=avatar):
+        st.markdown(msg["content"])
 
-# User input with interaction feedback
-if prompt := st.chat_input("Ask ArthaX anything about your money..."):
+if prompt := st.chat_input("Ask about SIPs, Gold, or Tax planning..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
+    with st.chat_message("user", avatar="👤"):
         st.markdown(prompt)
 
-    with st.chat_message("assistant"):
-        # Interactive status message
-        with st.status("🔍 Analyzing Market Data...", expanded=True) as status:
-            try:
-                # One-shot prompt for better speed
-                full_query = f"User is profiling for {goal} with a {risk} risk. Answer this: {prompt}. Rule: Use bold text for numbers and end with 3 short follow-up questions."
-                response = model.generate_content(full_query)
-                
-                # Simulate "typing" feel
-                time.sleep(0.5)
-                st.markdown(response.text)
-                
-                status.update(label="Analysis Complete", state="complete", expanded=False)
-                st.session_state.messages.append({"role": "assistant", "content": response.text})
-            except Exception as e:
-                st.error(f"Error: {e}")
+    with st.chat_message("assistant", avatar="🤖"):
+        try:
+            # We combine both requirements into ONE call to make it faster/cheaper
+            full_prompt = f"""
+            System: You are ArthaX, a finance expert. 
+            Context: User has a {risk_level} risk level and {expertise} expertise.
+            
+            Answer this query concisely with bullet points: {prompt}
+            
+            Rule: End with '---' then suggest 3 follow-up questions (max 8 words each).
+            Disclaimer: ALWAYS include "Educational purposes only, not advice."
+            """
+            
+            with st.status("ArthaX is analyzing markets...", expanded=True) as status:
+                response = model.generate_content(full_prompt)
+                st.write(response.text)
+                status.update(label="Analysis Complete!", state="complete", expanded=False)
+
+            st.session_state.messages.append({"role": "assistant", "content": response.text})
+
+        except Exception as e:
+            st.error(f"Error: {e}")
