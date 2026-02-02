@@ -48,7 +48,7 @@ model = genai.GenerativeModel("gemini-3-flash-preview")
 # PROMPTS
 # =========================
 FINANCE_CONTEXT = """
-You are FinBot, a professional and friendly financial education assistant.
+You are ArthaX, a professional and friendly financial education assistant.
 You explain finance topics in simple, structured language.
 
 Rules:
@@ -91,7 +91,7 @@ with st.sidebar:
 # HEADER
 # =========================
 st.markdown("""
-<h1>💰 FinBot</h1>
+<h1>💰 ArthaX</h1>
 <p style="color:gray;margin-top:-10px;">
 Smart finance insights, explained simply.
 </p>
