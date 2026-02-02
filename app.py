@@ -72,7 +72,7 @@ Rules:
 # SIDEBAR
 # =========================
 with st.sidebar:
-    st.header("⚙️ FinBot Settings")
+    st.header("⚙️ ArthaXSettings")
 
     risk_level = st.selectbox(
         "Risk Preference",
