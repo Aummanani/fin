@@ -17,7 +17,7 @@ st.set_page_config(
 try:
     # Use 1.5-flash for speed and stability
     genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-    model = genai.GenerativeModel("gemini-1.5-flash")
+   model = genai.GenerativeModel("gemini-1.5-flash-latest")
 except Exception as e:
     st.error("API Key missing or invalid. Please check your secrets.")
     st.stop()
