@@ -7,7 +7,7 @@ import time
 # =========================
 st.set_page_config(
     page_title="ArthaX – AI Finance Assistant",
-    page_icon="$",
+    page_icon="💸",
     layout="wide"
 )
 
@@ -91,7 +91,7 @@ with st.sidebar:
 # HEADER
 # =========================
 st.markdown("""
-<h1>💰 ArthaX</h1>
+<h1>💸 ArthaX</h1>
 <p style="color:gray;margin-top:-10px;">
 Smart finance insights, explained simply.
 </p>
