@@ -7,7 +7,7 @@ import time
 # =========================
 st.set_page_config(
     page_title="ArthaX – AI Finance Assistant",
-    page_icon="💰",
+    page_icon="$",
     layout="wide"
 )
 
