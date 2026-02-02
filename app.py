@@ -6,7 +6,7 @@ import time
 # PAGE CONFIG
 # =========================
 st.set_page_config(
-    page_title="FinBot – AI Finance Assistant",
+    page_title="ArthaX – AI Finance Assistant",
     page_icon="💰",
     layout="wide"
 )
